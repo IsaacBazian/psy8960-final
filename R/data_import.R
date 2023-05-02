@@ -12,20 +12,14 @@ employee_data_tbl <- read_delim(file = "../data/dataset.csv", delim = "+") %>%
   mutate(employee_id = row_number())
 
 # This code reads in the data from satisfaction_reviews.csv. The initial file had
-# some very strange formatting, with data on different numbers of columns across
-# different rows, so I thought it would be best to just get each row into one
-# column for consistent, so I set the delimiter to something very specific found
-# nowhere in the data to get all values into one column. I also noticed that
-# the employee IDs were always at the very end of each row, so I wrote some regex
-# to grab those numbers from each string and put them in their own column, and remove
-# that pattern from the character strings as they were now better stored somewhere else.
-# I also noticed that some string had "NA." entered instead of blank fields, so
-# I wrote some more regex to delete them and converted empty strings to NAs.
-satisfaction_tbl <- read_delim(file = "../data/satisfaction_reviews.csv", delim = "@!?", col_names = "satisfaction") %>% 
-  mutate(employee_id = as.integer(str_extract(string = satisfaction, pattern = "(\\d+)$"))) %>% 
-  mutate(satisfaction = str_remove(string = satisfaction, pattern = "(\\d+)$")) %>% 
-  mutate(satisfaction = str_remove_all(string = satisfaction, pattern = "NA\\.")) %>% 
-  mutate(satisfaction = na_if(satisfaction, ""))
+# some very strange formatting, but it turns out setting "." as the delimiter works
+# just fine for separating into the three variables(should have viewed in 
+# Notepad++ a bit earlier).
+satisfaction_tbl <- read_delim(file = "../data/satisfaction_reviews.csv", delim = ".", col_names = c("good_here", "bad_here", "employee_id"))
+  # mutate(employee_id = as.integer(str_extract(string = satisfaction, pattern = "(\\d+)$"))) %>% 
+  # mutate(satisfaction = str_remove(string = satisfaction, pattern = "(\\d+)$")) %>% 
+  # mutate(satisfaction = str_remove_all(string = satisfaction, pattern = "NA\\.")) %>% 
+  # mutate(satisfaction = na_if(satisfaction, ""))
 
 # This code joins the two previous tibbles on their shared employee_id columns,
 # then saves the object as an RDS file so it can be used in future parts.
