@@ -8,7 +8,7 @@ library(tidyverse)
 # that values were separated by '+', so we set that value. We were also told that
 # the rows were in order of employee IDs, from 1 to 1470, so we added a column
 # with each row number to act as the IDs.
-employee_data_tbl <- read_delim(file = "../data/dataset.csv", delim = "+") %>% 
+employee_data_tbl <- read_delim(file = "../data/dataset.csv", delim = "+", col_types = "iffifiifiifiiififiiiffiiiiiiiiiiii") %>% #Things that seem reasonably represented as continuous are integers, everything else is a factor
   mutate(employee_id = row_number())
 
 # This code reads in the data from satisfaction_reviews.csv. The initial file had
