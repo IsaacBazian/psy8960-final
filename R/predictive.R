@@ -212,7 +212,7 @@ modelcomparison_without_satisfaction_tbl <- tibble(
 # max(modelXGBWithoutSatisfaction$results$Accuracy)
 # mean(predict(modelXGBWithoutSatisfaction, finalproj_without_satisfaction_test_tbl) == finalproj_without_satisfaction_test_tbl$Attrition)
 
-
+# Combine tables, add run time, probably will choose Elastic Net or XGB
 
 
 
