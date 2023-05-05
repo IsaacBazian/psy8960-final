@@ -70,7 +70,7 @@ finalproj_without_satisfaction_train_tbl <- finalproj_without_satisfaction_shuff
 finalproj_without_satisfaction_test_tbl <- finalproj_without_satisfaction_shuffled_tbl[(split + 1):nrow(finalproj_without_satisfaction_shuffled_tbl),]
 training_folds_without_satisfaction <- createFolds(finalproj_without_satisfaction_train_tbl$Attrition, 10)
 
-
+presettuneLength <- 4
 
 
 # The following code sets up parallelization
@@ -88,7 +88,7 @@ modelElasticNet <- train(
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds_full, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = presettuneLength
 )
 toc()
 
@@ -101,7 +101,7 @@ modelRandomForest <- train(
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds_full, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = presettuneLength
 )
 toc()
 
@@ -114,7 +114,7 @@ modelXGB <- train(
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds_full, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = presettuneLength
 )
 toc()
 
@@ -129,7 +129,7 @@ modelElasticNetWithoutSatisfaction <- train(
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds_without_satisfaction, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = presettuneLength
 )
 toc()
 
@@ -142,7 +142,7 @@ modelRandomForestWithoutSatisfaction <- train(
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds_without_satisfaction, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = presettuneLength
 )
 toc()
 
@@ -155,7 +155,7 @@ modelXGBWithoutSatisfaction <- train(
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds_without_satisfaction, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = presettuneLength
 )
 toc()
 
