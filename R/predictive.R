@@ -6,13 +6,51 @@ library(caret)
 library(tictoc)
 library(parallel)
 library(doParallel)
-
-
+library(tm)
+library(qdap)
+library(textstem)
 
 
 # Data Import and Cleaning
 finalproj_tbl <- readRDS("../data/finalproj_data.rds") %>% 
   select(- good_here, - bad_here, - Over18) #MUST ADD SATISFACTION NLP LATER, TESTING ML FIRST
+
+
+satisfaction_tbl <- readRDS("../data/finalproj_data.rds") %>% 
+  select(good_here, bad_here, employee_id) %>% 
+  unite("satisfaction", good_here:bad_here, sep = " ", na.rm = T) %>% 
+  mutate(across("satisfaction", str_replace_all, "-|/", " "))
+
+satisfaction_corpus_original <- VCorpus(VectorSource(satisfaction_tbl$satisfaction))
+
+satisfaction_corpus_with_empty <- satisfaction_corpus_original %>% 
+  tm_map(content_transformer(replace_abbreviation)) %>% 
+  tm_map(content_transformer(replace_contraction)) %>% 
+  tm_map(content_transformer(replace_symbol)) %>%
+  tm_map(content_transformer(str_to_lower)) %>% 
+  tm_map(removePunctuation) %>% 
+  tm_map(removeWords, c(stopwords("en"))) %>% 
+  tm_map(stripWhitespace) %>% 
+  tm_map(content_transformer(lemmatize_strings))
+
+
+compare_them <- function(corp1, corp2) {
+  rows <- 1:length(corp1)
+  pick <- sample(rows, 1)
+  corp_list <- list("Row" = pick, Original = content(corp1[[pick]]), "Preprocessed" = content(corp2[[pick]]))
+  return(corp_list)
+}
+
+compare_them(satisfaction_corpus_original, satisfaction_corpus_with_empty)
+
+satisfaction_dtm <- DocumentTermMatrix(satisfaction_corpus_with_empty)
+satisfaction_slim_dtm <- removeSparseTerms(satisfaction_dtm, .996) # n/k ratio is 1470/638, in desired range
+# satisfaction_dtm
+# satisfaction_slim_dtm
+
+
+
+satisfaction_token_tbl <- as_tibble(as.matrix(satisfaction_dtm))
 
 
 
@@ -52,7 +90,7 @@ modelRandomForest <- train(
   method = "ranger",
   metric = "Accuracy",
   na.action = na.pass,
-  preProcess = "medianImpute",
+  preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
@@ -65,7 +103,7 @@ modelXGB <- train(
   method = "xgbLinear",
   metric = "Accuracy",
   na.action = na.pass,
-  preProcess = "medianImpute",
+  preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
