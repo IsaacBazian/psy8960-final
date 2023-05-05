@@ -32,20 +32,20 @@ training_folds <- createFolds(finalproj_train_tbl$Attrition, 10)
 local_cluster <- makeCluster(7)
 registerDoParallel(local_cluster)
 
-
+tic()
 modelElasticNet <- train(
   Attrition ~ .,
   finalproj_train_tbl,
   method = "glmnet",
   metric = "Accuracy",
   na.action = na.pass,
-  preProcess = "medianImpute",
+  preProcess = c("nzv", "medianImpute"),
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
+toc()
 
-
-
+tic()
 modelRandomForest <- train(
   Attrition ~ .,
   finalproj_train_tbl,
@@ -56,9 +56,9 @@ modelRandomForest <- train(
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
+toc()
 
-
-
+tic()
 modelXGB <- train(
   Attrition ~ .,
   finalproj_train_tbl,
@@ -69,6 +69,7 @@ modelXGB <- train(
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
+toc()
 
 
 #Stop parallelization
