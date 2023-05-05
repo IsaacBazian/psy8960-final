@@ -38,11 +38,11 @@ modelElasticNet <- train(
   Attrition ~ .,
   finalproj_train_tbl,
   method = "glmnet",
-  #metric = "Rsquared",
+  metric = "Accuracy",
   na.action = na.pass,
   preProcess = "medianImpute",
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = 5
 )
 tocElasticNet <- toc()
 
@@ -53,11 +53,11 @@ modelRandomForest <- train(
   Attrition ~ .,
   finalproj_train_tbl,
   method = "ranger",
-  #metric = "Rsquared",
+  metric = "Accuracy",
   na.action = na.pass,
   preProcess = "medianImpute",
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = 5
 )
 tocRandomForest <- toc()
 
@@ -68,11 +68,11 @@ modelXGB <- train(
   Attrition ~ .,
   finalproj_train_tbl,
   method = "xgbLinear",
-  #metric = "Rsquared",
+  metric = "Accuracy",
   na.action = na.pass,
   preProcess = "medianImpute",
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 3
+  tuneLength = 5
 )
 tocXGB <- toc()
 
@@ -99,5 +99,26 @@ mean(predict(modelXGB, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
 table(predict(modelElasticNet, finalproj_test_tbl), finalproj_test_tbl$Attrition)
 table(predict(modelRandomForest, finalproj_test_tbl), finalproj_test_tbl$Attrition)
 table(predict(modelXGB, finalproj_test_tbl), finalproj_test_tbl$Attrition)
+
+modelcomparison_tbl <- tibble(
+  algo = c("Elastic Net", "Random Forest", "eXtreme Gradient Boosting"),
+  cv_accuracy = c(
+    max(modelElasticNet$results$Accuracy),
+    max(modelRandomForest$results$Accuracy),
+    max(modelXGB$results$Accuracy)
+  ),
+  ho_accuracy = c(
+    mean(predict(modelElasticNet, finalproj_test_tbl) == finalproj_test_tbl$Attrition),
+    mean(predict(modelRandomForest, finalproj_test_tbl) == finalproj_test_tbl$Attrition),
+    mean(predict(modelXGB, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
+  )
+)
+
+
+
+
+
+
+
 
 
