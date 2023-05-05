@@ -59,15 +59,25 @@ finalproj_tbl <- left_join(finalproj_without_satisfaction_tbl, satisfaction_toke
 # This code randomizes the order of the data, then splits the data into training 
 # and testing sets with a 50/50 split, and creates training folds
 finalproj_shuffled_tbl <- finalproj_tbl[sample(nrow(finalproj_tbl)),]
-split50 <- round(nrow(finalproj_shuffled_tbl) * .50)
-finalproj_train_tbl <- finalproj_shuffled_tbl[1:split50,]
-finalproj_test_tbl <- finalproj_shuffled_tbl[(split50 + 1):nrow(finalproj_shuffled_tbl),]
-training_folds <- createFolds(finalproj_train_tbl$Attrition, 10)
+split <- round(nrow(finalproj_shuffled_tbl) * .50)
+finalproj_train_tbl <- finalproj_shuffled_tbl[1:split,]
+finalproj_test_tbl <- finalproj_shuffled_tbl[(split + 1):nrow(finalproj_shuffled_tbl),]
+training_folds_full <- createFolds(finalproj_train_tbl$Attrition, 10)
+
+finalproj_without_satisfaction_shuffled_tbl <- finalproj_without_satisfaction_tbl[sample(nrow(finalproj_without_satisfaction_tbl)),]
+#split75 <- round(nrow(finalproj_without_satisfaction_shuffled_tbl) * .75)
+finalproj_without_satisfaction_train_tbl <- finalproj_without_satisfaction_shuffled_tbl[1:split,]
+finalproj_without_satisfaction_test_tbl <- finalproj_without_satisfaction_shuffled_tbl[(split + 1):nrow(finalproj_without_satisfaction_shuffled_tbl),]
+training_folds_without_satisfaction <- createFolds(finalproj_without_satisfaction_train_tbl$Attrition, 10)
+
+
 
 
 # The following code sets up parallelization
 local_cluster <- makeCluster(7)
 registerDoParallel(local_cluster)
+
+#Tested models with satisfaction words
 
 tic()
 modelElasticNet <- train(
@@ -77,7 +87,7 @@ modelElasticNet <- train(
   metric = "Accuracy",
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
-  trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
+  trControl = trainControl(method="cv", indexOut = training_folds_full, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
 toc()
@@ -90,7 +100,7 @@ modelRandomForest <- train(
   metric = "Accuracy",
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
-  trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
+  trControl = trainControl(method="cv", indexOut = training_folds_full, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
 toc()
@@ -103,11 +113,51 @@ modelXGB <- train(
   metric = "Accuracy",
   na.action = na.pass,
   preProcess = c("nzv", "medianImpute"),
-  trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
+  trControl = trainControl(method="cv", indexOut = training_folds_full, number = 10, search = "grid", verboseIter=T),
   tuneLength = 3
 )
 toc()
 
+# Models without satisfaction words
+
+tic()
+modelElasticNetWithoutSatisfaction <- train(
+  Attrition ~ .,
+  finalproj_without_satisfaction_train_tbl,
+  method = "glmnet",
+  metric = "Accuracy",
+  na.action = na.pass,
+  preProcess = c("nzv", "medianImpute"),
+  trControl = trainControl(method="cv", indexOut = training_folds_without_satisfaction, number = 10, search = "grid", verboseIter=T),
+  tuneLength = 3
+)
+toc()
+
+tic()
+modelRandomForestWithoutSatisfaction <- train(
+  Attrition ~ .,
+  finalproj_without_satisfaction_train_tbl,
+  method = "ranger",
+  metric = "Accuracy",
+  na.action = na.pass,
+  preProcess = c("nzv", "medianImpute"),
+  trControl = trainControl(method="cv", indexOut = training_folds_without_satisfaction, number = 10, search = "grid", verboseIter=T),
+  tuneLength = 3
+)
+toc()
+
+tic()
+modelXGBWithoutSatisfaction <- train(
+  Attrition ~ .,
+  finalproj_without_satisfaction_train_tbl,
+  method = "xgbLinear",
+  metric = "Accuracy",
+  na.action = na.pass,
+  preProcess = c("nzv", "medianImpute"),
+  trControl = trainControl(method="cv", indexOut = training_folds_without_satisfaction, number = 10, search = "grid", verboseIter=T),
+  tuneLength = 3
+)
+toc()
 
 #Stop parallelization
 stopCluster(local_cluster)
@@ -143,8 +193,24 @@ modelcomparison_tbl <- tibble(
   )
 )
 
+modelcomparison_without_satisfaction_tbl <- tibble(
+  algo = c("Elastic Net", "Random Forest", "eXtreme Gradient Boosting"),
+  cv_accuracy = c(
+    max(modelElasticNetWithoutSatisfaction$results$Accuracy),
+    max(modelRandomForestWithoutSatisfaction$results$Accuracy),
+    max(modelXGBWithoutSatisfaction$results$Accuracy)
+  ),
+  ho_accuracy = c(
+    mean(predict(modelElasticNetWithoutSatisfaction, finalproj_without_satisfaction_test_tbl) == finalproj_without_satisfaction_test_tbl$Attrition),
+    mean(predict(modelRandomForestWithoutSatisfaction, finalproj_without_satisfaction_test_tbl) == finalproj_without_satisfaction_test_tbl$Attrition),
+    mean(predict(modelXGBWithoutSatisfaction, finalproj_without_satisfaction_test_tbl) == finalproj_without_satisfaction_test_tbl$Attrition)
+  )
+)
 
 
+
+# max(modelXGBWithoutSatisfaction$results$Accuracy)
+# mean(predict(modelXGBWithoutSatisfaction, finalproj_without_satisfaction_test_tbl) == finalproj_without_satisfaction_test_tbl$Attrition)
 
 
 
