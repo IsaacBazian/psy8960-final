@@ -33,7 +33,6 @@ local_cluster <- makeCluster(7)
 registerDoParallel(local_cluster)
 
 
-tic()
 modelElasticNet <- train(
   Attrition ~ .,
   finalproj_train_tbl,
@@ -42,13 +41,11 @@ modelElasticNet <- train(
   na.action = na.pass,
   preProcess = "medianImpute",
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 5
+  tuneLength = 3
 )
-tocElasticNet <- toc()
 
 
 
-tic()
 modelRandomForest <- train(
   Attrition ~ .,
   finalproj_train_tbl,
@@ -57,13 +54,11 @@ modelRandomForest <- train(
   na.action = na.pass,
   preProcess = "medianImpute",
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 5
+  tuneLength = 3
 )
-tocRandomForest <- toc()
 
 
 
-tic()
 modelXGB <- train(
   Attrition ~ .,
   finalproj_train_tbl,
@@ -72,12 +67,8 @@ modelXGB <- train(
   na.action = na.pass,
   preProcess = "medianImpute",
   trControl = trainControl(method="cv", indexOut = training_folds, number = 10, search = "grid", verboseIter=T),
-  tuneLength = 5
+  tuneLength = 3
 )
-tocXGB <- toc()
-
-
-
 
 
 #Stop parallelization
@@ -88,17 +79,17 @@ registerDoSEQ()
 
 # Publication
 
-modelElasticNet$results$Accuracy
-modelRandomForest$results$Accuracy
-modelXGB$results$Accuracy
-
-mean(predict(modelElasticNet, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
-mean(predict(modelRandomForest, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
-mean(predict(modelXGB, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
-
-table(predict(modelElasticNet, finalproj_test_tbl), finalproj_test_tbl$Attrition)
-table(predict(modelRandomForest, finalproj_test_tbl), finalproj_test_tbl$Attrition)
-table(predict(modelXGB, finalproj_test_tbl), finalproj_test_tbl$Attrition)
+# modelElasticNet$results$Accuracy
+# modelRandomForest$results$Accuracy
+# modelXGB$results$Accuracy
+# 
+# mean(predict(modelElasticNet, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
+# mean(predict(modelRandomForest, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
+# mean(predict(modelXGB, finalproj_test_tbl) == finalproj_test_tbl$Attrition)
+# 
+# table(predict(modelElasticNet, finalproj_test_tbl), finalproj_test_tbl$Attrition)
+# table(predict(modelRandomForest, finalproj_test_tbl), finalproj_test_tbl$Attrition)
+# table(predict(modelXGB, finalproj_test_tbl), finalproj_test_tbl$Attrition)
 
 modelcomparison_tbl <- tibble(
   algo = c("Elastic Net", "Random Forest", "eXtreme Gradient Boosting"),
