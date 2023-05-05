@@ -12,12 +12,12 @@ library(textstem)
 
 
 # Data Import and Cleaning
-finalproj_tbl <- readRDS("../data/finalproj_data.rds") %>% 
-  select(- good_here, - bad_here, - Over18) #MUST ADD SATISFACTION NLP LATER, TESTING ML FIRST
+finalproj_without_satisfaction_tbl <- readRDS("../data/finalproj_data.rds") %>% 
+  select(- good_here, - bad_here, - Over18) #Over18 has no variance, and is therefore a constant, not a true variable. Provides no information for prediction.
 
 
 satisfaction_tbl <- readRDS("../data/finalproj_data.rds") %>% 
-  select(good_here, bad_here, employee_id) %>% 
+  select(good_here, bad_here) %>% 
   unite("satisfaction", good_here:bad_here, sep = " ", na.rm = T) %>% 
   mutate(across("satisfaction", str_replace_all, "-|/", " "))
 
@@ -48,11 +48,10 @@ satisfaction_slim_dtm <- removeSparseTerms(satisfaction_dtm, .996) # n/k ratio i
 # satisfaction_dtm
 # satisfaction_slim_dtm
 
+satisfaction_token_tbl <- as_tibble(as.matrix(satisfaction_slim_dtm)) %>% 
+  mutate(employee_id = row_number())
 
-
-satisfaction_token_tbl <- as_tibble(as.matrix(satisfaction_dtm))
-
-
+finalproj_tbl <- left_join(finalproj_without_satisfaction_tbl, satisfaction_token_tbl, join_by(employee_id))
 
 
 # Analysis
