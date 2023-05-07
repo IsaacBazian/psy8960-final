@@ -60,7 +60,7 @@ H2_plot
 ggsave("../figs/H2.png", plot = H2_plot, width = 8, height = 4.5, units = "in", dpi = 300)
 
 # Visualization of H3
-H3_plot <- ggplot(finalproj_stats_tbl, aes(x = predict(H3_model), y = RelationshipSatisfaction, color = Gender, group = Gender)) +
+H3_plot <- ggplot(finalproj_stats_tbl, aes(y = predict(H3_model), x = RelationshipSatisfaction, color = Gender, group = Gender)) +
   geom_point(size = 0.5, position = position_jitter()) +
   geom_smooth(method = "lm", se = F) +
   labs(x = "Predicted Years at Company", y = "Relationship Satisfaction")
