@@ -13,13 +13,8 @@ employee_data_tbl <- read_delim(file = "../data/dataset.csv", delim = "+", col_t
 
 # This code reads in the data from satisfaction_reviews.csv. The initial file had
 # some very strange formatting, but it turns out setting "." as the delimiter works
-# just fine for separating into the three variables(should have viewed in 
-# Notepad++ a bit earlier).
+# just fine for separating into the three variables.
 satisfaction_tbl <- read_delim(file = "../data/satisfaction_reviews.csv", delim = ".", col_names = c("good_here", "bad_here", "employee_id"))
-  # mutate(employee_id = as.integer(str_extract(string = satisfaction, pattern = "(\\d+)$"))) %>% 
-  # mutate(satisfaction = str_remove(string = satisfaction, pattern = "(\\d+)$")) %>% 
-  # mutate(satisfaction = str_remove_all(string = satisfaction, pattern = "NA\\.")) %>% 
-  # mutate(satisfaction = na_if(satisfaction, ""))
 
 # This code joins the two previous tibbles on their shared employee_id columns,
 # then saves the object as an RDS file so it can be used in future parts.
