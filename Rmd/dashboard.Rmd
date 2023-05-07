@@ -25,7 +25,7 @@ finalproj_full_tbl <- readRDS("../data/finalproj_data.rds")
 finalproj_skinny_tbl <- finalproj_full_tbl %>% 
   select(MonthlyIncome, Attrition, JobSatisfaction, Department, EducationField, Gender, JobRole)
 
-saveRDS(finalproj_skinny_tbl, "../shiny/finalshinydata.rds") #This code takes the skinny data and stores it for use in the shiny app
+saveRDS(finalproj_skinny_tbl, "../shiny/people_dashboard/finalshinydata.rds") #This code takes the skinny data and stores it for use in the shiny app
 ```
 
 

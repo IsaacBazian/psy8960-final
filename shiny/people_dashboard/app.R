@@ -28,7 +28,8 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+           plotOutput("plot"),
+           tableOutput("table")
         )
     )
 )
@@ -36,15 +37,47 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+  # This line reads in the data from where it was exported in the Rmd file. In this initial form, it is unfiltered, with all data points 
+  finalshinydata_import_tbl <- readRDS(file = "./finalshinydata.rds")
+  
+  # This dataset goes through filtering as the user hits radio buttons
+  finalshinydata_tbl <- finalshinydata_import_tbl
+  
+  
+    output$plot <- renderPlot({
+      # This if statement determines if data is filtered by participant gender. 
+      # If users select 'All', no filtering happens - if they select 'Male' or 
+      # 'Female', that input is used to filter the Gender column
+      if (input$gender != "All") {
+        finalshinydata_tbl <- finalshinydata_tbl %>% 
+          filter(Gender == input$gender)
+      }
+      
+      # This if statement determines if data is filtered by participant department. 
+      # If users select 'All', no filtering happens - if they select another 
+      # option, that input is used to filter the Department column
+      if (input$department != "All") {
+        finalshinydata_tbl <- finalshinydata_tbl %>% 
+          filter(Department == input$department)
+      }
+      
+      # This if statement determines if data is filtered by participant education field. 
+      # If users select 'All', no filtering happens - if they select another 
+      # option, that input is used to filter the EducationField column
+      if (input$education != "All") {
+        finalshinydata_tbl <- finalshinydata_tbl %>% 
+          filter(EducationField == input$education)
+      }
+      
+      
+      if (input$jobrole != "All") {
+        finalshinydata_tbl <- finalshinydata_tbl %>% 
+          filter(JobRole == input$jobrole)
+      }
+      
+      
+      
+      
     })
 }
 
