@@ -63,7 +63,7 @@ ggsave("../figs/H2.png", plot = H2_plot, width = 8, height = 4.5, units = "in", 
 H3_plot <- ggplot(finalproj_stats_tbl, aes(y = predict(H3_model), x = RelationshipSatisfaction, color = Gender, group = Gender)) +
   geom_point(size = 0.5, position = position_jitter()) +
   geom_smooth(method = "lm", se = F) +
-  labs(x = "Predicted Years at Company", y = "Relationship Satisfaction")
+  labs(y = "Predicted Years at Company", x = "Relationship Satisfaction")
 
 H3_plot
 
