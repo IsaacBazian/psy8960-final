@@ -17,15 +17,17 @@ H1_tbl <- finalproj_stats_tbl %>%
 
 # Hypothesis 2
 
-finalproj_stats_tbl %>%
+H2_anova_tbl <- finalproj_stats_tbl %>%
   anova_test(MonthlyIncome ~ Department, detailed = T)
 
+H2_tukeyhsd_tbl <- finalproj_stats_tbl %>% 
+  tukey_hsd(MonthlyIncome ~ Department)
 
 
 # Hypothesis 3
 
-
-summary(lm(YearsAtCompany ~ RelationshipSatisfaction*Gender, data = finalproj_stats_tbl))
+H3_model <- lm(YearsAtCompany ~ RelationshipSatisfaction*Gender, data = finalproj_stats_tbl)
+summary(H3_model)
 
 
 
@@ -38,7 +40,8 @@ summary(lm(YearsAtCompany ~ RelationshipSatisfaction*Gender, data = finalproj_st
 # Visualization of H1
 H1_plot <- ggplot(finalproj_stats_tbl, aes(x = PerformanceRating, y = MonthlyIncome)) + 
   geom_point(position = position_jitter(width = 0.1)) +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Performance Rating", y = "Monthly Income")
 
 H1_plot
 
@@ -46,11 +49,16 @@ H1_plot
 
 # Visualization of H2
 ggplot(finalproj_stats_tbl, aes(x = Department, y = MonthlyIncome)) +
-  geom_boxplot()
+  geom_boxplot() +
+  labs(y = "Monthly Income")
 
 
 
-
+# Visualization of H3
+ggplot(finalproj_stats_tbl, aes(x = predict(H3_model), y = RelationshipSatisfaction, color = Gender, group = Gender)) +
+  geom_point(position = position_jitter()) +
+  geom_smooth(method = "lm", se = F) +
+  labs(x = "Predicted Years at Company", y = "Relationship Satisfaction")
 
 
 
