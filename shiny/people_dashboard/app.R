@@ -87,7 +87,7 @@ server <- function(input, output) {
         chosen_outcome <- "JobSatisfaction"
       }
       
-      ggplot(finalshinydata_tbl, aes(x = as.numeric(.data[[chosen_outcome]]))) + 
+      ggplot(finalshinydata_tbl, aes(x = .data[[chosen_outcome]])) + 
         geom_histogram()
       
       

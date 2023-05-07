@@ -23,7 +23,8 @@ library(tidyverse)
 finalproj_full_tbl <- readRDS("../data/finalproj_data.rds")
 
 finalproj_skinny_tbl <- finalproj_full_tbl %>% 
-  select(MonthlyIncome, Attrition, JobSatisfaction, Department, EducationField, Gender, JobRole)
+  select(MonthlyIncome, Attrition, JobSatisfaction, Department, EducationField, Gender, JobRole) %>% 
+  mutate(Attrition = case_match(Attrition, "Yes" ~ 1, "No" ~ 0)) #Also makes the column numeric
 
 saveRDS(finalproj_skinny_tbl, "../shiny/people_dashboard/finalshinydata.rds") #This code takes the skinny data and stores it for use in the shiny app
 ```
