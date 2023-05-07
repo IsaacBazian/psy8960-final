@@ -32,4 +32,16 @@ saveRDS(finalproj_skinny_tbl, "../shiny/people_dashboard/finalshinydata.rds") #T
 
 
 
+## Testing
+
+```{r}
+
+chosen_outcome <- "MonthlyIncome"
+ggplot(finalproj_skinny_tbl, aes(x = .data[[chosen_outcome]])) + 
+        geom_histogram()
+```
+
+
+
+
 

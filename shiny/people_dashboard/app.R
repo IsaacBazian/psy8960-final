@@ -19,7 +19,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-          radioButtons("outcome", "Outcome:", choices = c("Monthly Pay", "Attrition", "Overall Job Satisfaction"), selected = "Monthly Pay"),
+          radioButtons("outcome", "Outcome:", choices = c("Monthly Pay", "Turnover Status", "Overall Job Satisfaction"), selected = "Monthly Pay"),
           radioButtons("gender", "Gender:", choices = c("Male", "Female", "All"), selected = "All"),
           radioButtons("department", "Department:", choices = c("Sales", "Research & Development", "Human Resources", "All"), selected = "All"),
           radioButtons("education", "Field of Education:", choices = c("Life Sciences", "Medical", "Marketing", "Technical Degree", "Human Resources", "Other", "All"), selected = "All"),
@@ -69,11 +69,26 @@ server <- function(input, output) {
           filter(EducationField == input$education)
       }
       
-      
+      # This if statement determines if data is filtered by participant job role. 
+      # If users select 'All', no filtering happens - if they select another 
+      # option, that input is used to filter the JobRole column
       if (input$jobrole != "All") {
         finalshinydata_tbl <- finalshinydata_tbl %>% 
           filter(JobRole == input$jobrole)
       }
+      
+      # This if else chain takes the chosen outcome names and puts them in terms
+      # of the variable names in the dataset
+      if (input$outcome == "Monthly Pay") {
+        chosen_outcome <- "MonthlyIncome"
+      } else if (input$outcome == "Turnover Status") {
+        chosen_outcome <- "Attrition"
+      } else if (input$outcome == "Overall Job Satisfaction") {
+        chosen_outcome <- "JobSatisfaction"
+      }
+      
+      ggplot(finalshinydata_tbl, aes(x = .data[[chosen_outcome]])) + 
+        geom_histogram()
       
       
       
