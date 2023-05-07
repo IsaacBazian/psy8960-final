@@ -87,10 +87,53 @@ server <- function(input, output) {
         chosen_outcome <- "JobSatisfaction"
       }
       
-      ggplot(finalshinydata_tbl, aes(x = .data[[chosen_outcome]])) + 
+      ggplot(finalshinydata_tbl, aes(x = as.numeric(.data[[chosen_outcome]]))) + 
         geom_histogram()
       
       
+    })
+    
+    output$table <- renderTable({
+      
+      if(input$gender != "All") {
+        gender_used <- "Gender"
+      } else {
+        gender_used <- NULL
+      }
+      
+      if(input$department != "All") {
+        department_used <- "Department"
+      } else {
+        department_used <- NULL
+      }
+      
+      if(input$education != "All") {
+        education_used <- "EducationField"
+      } else {
+        education_used <- NULL
+      }
+      
+      if(input$jobrole != "All") {
+        jobrole_used <- "JobRole"
+      } else {
+        jobrole_used <- NULL
+      }
+      
+      filters_used <- c(gender_used, department_used, education_used, jobrole_used)
+      
+      # This if else chain takes the chosen outcome names and puts them in terms
+      # of the variable names in the dataset
+      if (input$outcome == "Monthly Pay") {
+        chosen_outcome <- "MonthlyIncome"
+      } else if (input$outcome == "Turnover Status") {
+        chosen_outcome <- "Attrition"
+      } else if (input$outcome == "Overall Job Satisfaction") {
+        chosen_outcome <- "JobSatisfaction"
+      }
+      
+      finalshinydata_import_tbl %>% 
+        group_by(across(all_of(filters_used))) %>% 
+        summarise("Mean" = mean(.data[[chosen_outcome]]), "Standard Deviation" = sd(.data[[chosen_outcome]]))
       
       
     })

@@ -36,10 +36,27 @@ saveRDS(finalproj_skinny_tbl, "../shiny/people_dashboard/finalshinydata.rds") #T
 
 ```{r}
 
-chosen_outcome <- "MonthlyIncome"
+chosen_outcome <- "Attrition"
 ggplot(finalproj_skinny_tbl, aes(x = .data[[chosen_outcome]])) + 
-        geom_histogram()
+        geom_bar()
 ```
+
+
+```{r}
+
+chosen_outcome <- "MonthlyIncome"
+
+filters_used <- c("Gender", "EducationField")
+
+finalproj_skinny_tbl %>%
+  group_by(NULL) %>% 
+  summarise("Mean" = mean(.data[[chosen_outcome]]), "Standard Deviation" = sd(.data[[chosen_outcome]]))
+
+finalproj_skinny_tbl %>% 
+  group_by(across(all_of(filters_used))) %>% 
+  summarise("Mean" = mean(.data[[chosen_outcome]]), "Standard Deviation" = sd(.data[[chosen_outcome]]))
+```
+
 
 
 
