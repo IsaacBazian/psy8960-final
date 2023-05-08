@@ -1,0 +1,5 @@
+Coefficient,t-Statistic,p-Value
+(Intercept), 9.28,.00
+Relationship Satisfaction (RS), 1.58,.11
+Gender, 0.88,.38
+RS X Gender,-1.42,.16

@@ -41,7 +41,8 @@ H3_model <- lm(YearsAtCompany ~ RelationshipSatisfaction*Gender, data = finalpro
 H3_list <- summary(H3_model)
 H3_list
 
-
+#This tidy tibble of the results is used later in the Publication section
+H3_tbl <- tidy(H3_list)
 
 # Visualization
 
@@ -149,7 +150,26 @@ paste0("For Hypothesis 2, the ANOVA for pay differing between departments produc
 write_csv(H2_publication_tbl, "../out/H2.csv")
 
 
+# Publication Results for H3
 
+# This code makes a publication tibble by pulling results out of the analysis tibble
+# and formatting it for publication, with descriptive labels and appropriate trailing
+# and leading zeros.
+H3_publication_tbl <- tibble(
+  "Coefficient" = c("(Intercept)", "Relationship Satisfaction (RS)", "Gender", "RS X Gender"),
+  "t-Statistic" = format(round(H3_tbl$statistic, 2), nsmall = 2),
+  "p-Value" = str_remove(format(round(H3_tbl$p.value, 2), nsmall = 2), pattern = "0")
+)
+H3_publication_tbl
+
+# This code dynamically pulls numbers from the publication table
+# in interpreting the results.
+paste0("For Hypothesis 3, the linear model predicting tenure from relationship satisfaction with gender as a moderator results in a significant result only for the intercept coefficient, with a t-statistics of ",
+       H3_publication_tbl$`t-Statistic`[1], " corresponding to a p-value of ", H3_publication_tbl$`p-Value`[1], 
+       ", which is below the alpha level. As the other coefficients do not have significant results, we would fail to reject the null hypothesis that relationship satisfaction moderated by gender can predict tenure.")
+
+# This code write the publication table to a csv and saves it in the out folder.
+write_csv(H3_publication_tbl, "../out/H3.csv")
 
 
 
