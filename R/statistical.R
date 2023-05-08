@@ -88,6 +88,58 @@ ggsave("../figs/H3.png", plot = H3_plot, width = 8, height = 4.5, units = "in", 
 
 # Publication Results for H1
 
+# This code makes a publication tibble by pulling results out of the analysis tibble
+# and formatting it for publication, with descriptive labels and appropriate trailing
+# and leading zeros.
+H1_publication_tbl <- tibble(
+  "Correlation" = str_remove(format(round(H1_tbl$cor, 2), nsmall = 2), pattern = "0"),
+  "Test Statistic" = format(round(H1_tbl$statistic, 2), nsmall = 2),
+  "p-Value" = str_remove(format(round(H1_tbl$p, 2), nsmall = 2), pattern = "0")
+)
+H1_publication_tbl
+
+# This code pulls the numbers from the publication table to dynamically pull numbers
+# in interpreting the results.
+paste0("For Hypothesis 1, the correlation between monthly pay and performance rating was ", H1_publication_tbl$Correlation,
+       ", with a test statistic of ", H1_publication_tbl$`Test Statistic`, " corresponding to a p-value of ", H1_publication_tbl$`p-Value`,
+       ". As this value is above the alpha level, we would fail to reject the null hypothesis that there is no relationship between monthly pay and performance rating.")
+
+# This code write the publication table to a csv and saves it in the out folder.
+write_csv(H1_publication_tbl, "../out/H1.csv")
+
+
+# Publication results for H2
+
+H2_publication_tbl <- tibble(
+  "Source of Variation" = c("Within", "Between", "Total"),
+  "Sum of Squares" = c(
+    H2_anova_tbl$SSn,
+    H2_anova_tbl$SSd,
+    (H2_anova_tbl$SSn + H2_anova_tbl$SSd)),
+  "Degrees of Freedom" = c(
+    H2_anova_tbl$DFn,
+    H2_anova_tbl$DFd,
+    nrow(finalproj_stats_tbl) - 1),
+  "Mean Squares" = c(
+    H2_anova_tbl$SSn / H2_anova_tbl$DFn,
+    H2_anova_tbl$SSd / H2_anova_tbl$DFd,
+    NA),
+  "F-Statistic" = c(
+    format(round(H2_anova_tbl$F, 2), nsmall = 2),
+    NA,
+    NA),
+  "p-Value" = c(
+    str_remove(format(round(H2_anova_tbl$p, 2), nsmall = 2), pattern = "0"),
+    NA,
+    NA)
+  )
+H2_publication_tbl
+
+
+
+
+
+
 
 
 
