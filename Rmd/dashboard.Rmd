@@ -18,6 +18,7 @@ library(tidyverse)
 
 ## **Online Resources**
 
+An interactive web app is available by [clicking this link](https://isaacbazian.shinyapps.io/people_dashboard/)
 
 ## **Data Import and Cleaning**
 
