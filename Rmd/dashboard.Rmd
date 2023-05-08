@@ -16,47 +16,92 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(tidyverse)
 ```
 
+## **Online Resources**
+
 
 ## **Data Import and Cleaning**
 
 ```{r data_import}
+#This code reads in the original data
 finalproj_full_tbl <- readRDS("../data/finalproj_data.rds")
 
+# This code takes the original data and trims it down into a 'skinny' format, including
+# only the variables that will be used in the app - these are the 3 possible outcomes
+# and the 4 possible filter categories. It should be noted that I changed Attrition from
+# 'Yes' and 'No' to 1 and 0 instead, making it numeric so that it could be properly
+# plotted on a histogram. I add text in the app under the plot when the user selects this
+# outcome to ensure they understand what 1 and 0 means in that context.
 finalproj_skinny_tbl <- finalproj_full_tbl %>% 
   select(MonthlyIncome, Attrition, JobSatisfaction, Department, EducationField, Gender, JobRole) %>% 
   mutate(Attrition = case_match(Attrition, "Yes" ~ 1, "No" ~ 0)) #Also makes the column numeric
 
-saveRDS(finalproj_skinny_tbl, "../shiny/people_dashboard/finalshinydata.rds") #This code takes the skinny data and stores it for use in the shiny app
+ #This code takes the skinny data and stores it for use in the shiny app
+saveRDS(finalproj_skinny_tbl, "../shiny/people_dashboard/finalshinydata.rds")
 ```
 
 
 
+## **Justifications for Approach**
+
+I chose to have users select which outcomes they wanted to see and what filtering
+they wanted applied to the data using radio buttons. I personally think radio buttons
+are quite intuitive, and they allow you to always see all available options.
+A dropdown menu might have made things more compact, but I like being able to change
+parameters with one click on a button, rather than clicking into a dropdown and then
+clicking the new options. I used a sidebar layout because I thought it kept the buttons'
+relations to the plot and table easy to intuit and see.
+
+For the outcome, I have Monthly Income selected by default. This seemed like a reasonable
+first thing a user would want to know, but it's ultimately arbitrary - any of the 3
+outcomes could have been the default. Filters are set to 'All' by default, reflecting no
+filtering. This way, the user starts with as much data as possible, which they can
+then opt to cut down.
+
+The app displays a histogram of the selected outcome with whatever data remains 
+after filtering. This fulfilled the project requirement of a univariate visualization
+in a way I thought was intuitive and informative. A table of means and standard deviations
+of the selected outcome split by all possible groups of selected filtering terms
+was also included to fulfill project requirements. Additionally, if the user selects
+Turnover Status as the outcome of interest, I display text underneath the plot so that
+they know a 0 means the employee did not turn over, and a 1 means the employee
+did turn over.
+
+Moving on to the server, I executed the logic in ways that made sense to my thought process.
+Starting with the plot: The plot is ultimately going to be made in a pretty similar way,
+it's just a question of what data makes it through the filtering. Therefore, after
+reading in the skinny data, I make another copy of the data that will be successively filtered
+as the user selects different filtering options. For any filter category where
+the user leaves it at 'All' (or changes it back to 'All' later), no filtering is done
+with that category. If they do select filtering in that category, whatever option
+they choose is used to filter the data, such that it only keep rows in that filtered
+column that exactly match the user's choice. Once the data goes through all of
+its filtering, it can be fed into the plot.
+
+The names of the outcomes users select do not exactly match the names of the variables
+in the dataset, so I wrote logic to change the contents of an object to the relevant
+variable name based on outcome the user chose. This also gets fed into the plot,
+defining the x axis data and name, as well as the plot name.
+
+If the user selects Turnover Status as their outcome of interest, there is logic to display
+a text message under the plot explaining how to interpret 0s and 1s, as described above.
+
+For displaying the table of means and standard deviations, the project 
+requirements immediately made me think of tidyverse's group_by and summarise functions.
+I knew it was only a matter of taking any filter variables that had an option 
+other than 'All' selected, then grouping the original data by those variables and
+summarising means and standard deviations. That's basically all that code does -
+if a filter has any option but 'All' selected, the name of the variable is added to
+a chacter vector, which is then fed into group_by (with some extra code to make
+a character vector work) on the original data. The outcome selected is translated into
+the variable name in the same way as it was for the plot, and fed into the pipeline to
+get the mean and standard deviation. This results in a table of means and standard deviations
+for the outcome selected, split by all combinations of filters applied.
+
+With that all done, it's simply a matter of deploying the app to shinyapps and
+putting the link to it at the top of this Rmarkdown.
 
 
-## Testing
 
-```{r}
-
-chosen_outcome <- "Attrition"
-ggplot(finalproj_skinny_tbl, aes(x = .data[[chosen_outcome]])) + 
-        geom_bar()
-```
-
-
-```{r}
-
-chosen_outcome <- "MonthlyIncome"
-
-filters_used <- c("Gender", "EducationField")
-
-finalproj_skinny_tbl %>%
-  group_by(NULL) %>% 
-  summarise("Mean" = mean(.data[[chosen_outcome]]), "Standard Deviation" = sd(.data[[chosen_outcome]]))
-
-finalproj_skinny_tbl %>% 
-  group_by(across(all_of(filters_used))) %>% 
-  summarise("Mean" = mean(.data[[chosen_outcome]]), "Standard Deviation" = sd(.data[[chosen_outcome]]))
-```
 
 
 
