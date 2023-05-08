@@ -156,7 +156,8 @@ write_csv(H2_publication_tbl, "../out/H2.csv")
 # and formatting it for publication, with descriptive labels and appropriate trailing
 # and leading zeros.
 H3_publication_tbl <- tibble(
-  "Coefficient" = c("(Intercept)", "Relationship Satisfaction (RS)", "Gender", "RS X Gender"),
+  "Term" = c("(Intercept)", "Relationship Satisfaction (RS)", "Gender", "RS X Gender"),
+  "Coefficient Estimate" = format(round(H3_tbl$estimate, 2), nsmall = 2),
   "t-Statistic" = format(round(H3_tbl$statistic, 2), nsmall = 2),
   "p-Value" = str_remove(format(round(H3_tbl$p.value, 2), nsmall = 2), pattern = "0")
 )
