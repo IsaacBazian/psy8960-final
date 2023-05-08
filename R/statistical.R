@@ -98,7 +98,7 @@ H1_publication_tbl <- tibble(
 )
 H1_publication_tbl
 
-# This code pulls the numbers from the publication table to dynamically pull numbers
+# This code dynamically pulls numbers from the publication table
 # in interpreting the results.
 paste0("For Hypothesis 1, the correlation between monthly pay and performance rating was ", H1_publication_tbl$Correlation,
        ", with a test statistic of ", H1_publication_tbl$`Test Statistic`, " corresponding to a p-value of ", H1_publication_tbl$`p-Value`,
@@ -110,6 +110,9 @@ write_csv(H1_publication_tbl, "../out/H1.csv")
 
 # Publication results for H2
 
+# This code makes a publication tibble by pulling results out of the analysis tibble
+# and formatting it for publication, with descriptive labels and appropriate trailing
+# and leading zeros.
 H2_publication_tbl <- tibble(
   "Source of Variation" = c("Within", "Between", "Total"),
   "Sum of Squares" = c(
@@ -135,10 +138,15 @@ H2_publication_tbl <- tibble(
   )
 H2_publication_tbl
 
+# This code dynamically pulls numbers from the publication table and supplementary analysis table
+# in interpreting the results.
+paste0("For Hypothesis 2, the ANOVA for pay differing between departments produced an F test statistic of ", H2_publication_tbl$`F-Statistic`[1],
+       " corresponding to a p-Value of ", H2_publication_tbl$`p-Value`[1], 
+       ". As this result was above the alpha level, we would reject the null hypothesis and conclude that there is a significant difference in pay between departments. A post-hoc TukeyHSD test revealed that the only significant difference in pay was between the Sales and Research & Development departments, with a p-Value of ", 
+       str_remove(format(round(H2_tukeyhsd_tbl$p.adj[1], 2), nsmall = 2), pattern = "0"), ".")
 
-
-
-
+# This code write the publication table to a csv and saves it in the out folder.
+write_csv(H2_publication_tbl, "../out/H2.csv")
 
 
 
