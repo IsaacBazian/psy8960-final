@@ -16,7 +16,7 @@ ui <- fluidPage(
     # Application title
     titlePanel("People Dashboard"),
 
-    # Sidebar with a slider input for number of bins 
+    # Radio buttons for outcomes and possible filters
     sidebarLayout(
         sidebarPanel(
           radioButtons("outcome", "Outcome:", choices = c("Monthly Pay", "Turnover Status", "Overall Job Satisfaction"), selected = "Monthly Pay"),
@@ -26,9 +26,12 @@ ui <- fluidPage(
           radioButtons("jobrole", "Job Role:", choices = c("Sales Executive", "Research Scientist", "Laboratory Technician", "Manufacturing Director", "Healthcare Representative", "Manager", "Sales Representative", "Research Director", "Human Resources", "All"), selected = "All")
         ),
 
-        # Show a plot of the generated distribution
+        # Show a plot of the generated distribution and a table of means and standard deviations.
+        # Text is also added under the plot if the user chooses Turnover Status as the outcome to
+        # explain how to interpret 0 vs 1
         mainPanel(
            plotOutput("plot"),
+           textOutput("turnovertext"),
            tableOutput("table")
         )
     )
@@ -43,7 +46,7 @@ server <- function(input, output) {
   # This dataset goes through filtering as the user hits radio buttons
   finalshinydata_tbl <- finalshinydata_import_tbl
   
-  
+  # This code makes the plot that is displayed according to chosen outcome and applied filters
     output$plot <- renderPlot({
       # This if statement determines if data is filtered by participant gender. 
       # If users select 'All', no filtering happens - if they select 'Male' or 
@@ -77,8 +80,8 @@ server <- function(input, output) {
           filter(JobRole == input$jobrole)
       }
       
-      # This if else chain takes the chosen outcome names and puts them in terms
-      # of the variable names in the dataset
+      # This if else chain takes the chosen outcome name and puts it in terms
+      # of the variable name in the dataset
       if (input$outcome == "Monthly Pay") {
         chosen_outcome <- "MonthlyIncome"
       } else if (input$outcome == "Turnover Status") {
@@ -87,42 +90,67 @@ server <- function(input, output) {
         chosen_outcome <- "JobSatisfaction"
       }
       
+      # This code makes the plot from the filtered dataset, changing the x-axis
+      # and plot title to match the selected outcome
       ggplot(finalshinydata_tbl, aes(x = .data[[chosen_outcome]])) + 
-        geom_histogram()
+        geom_histogram() +
+        labs(x = input$outcome, y = "Number of Employees", title = paste0("Histogram of Employee ", input$outcome))
       
       
     })
     
+    # This code adds text under the plot if Turnover Status is selected as the outcome, and tells the viewer
+    # how to interpret 0 vs 1 for that outcome
+    output$turnovertext <- renderText({
+      
+      if(input$outcome == "Turnover Status") {
+        plottext <- "Note that 0 means the employee has not turned over and 1 means the employee has turned over."
+      } else {
+        plottext <- NULL
+      }
+      
+      plottext
+      
+    })
+    
+    
+    # This code makes the table of means and standard deviations shown based on
+    # whether a given filter has been used
     output$table <- renderTable({
       
+      # This code checks if a Gender filter has been applied
       if(input$gender != "All") {
         gender_used <- "Gender"
       } else {
         gender_used <- NULL
       }
       
+      # This code checks if a Department filter has been applied
       if(input$department != "All") {
         department_used <- "Department"
       } else {
         department_used <- NULL
       }
       
+      # This code checks if an EducationField filter has been applied
       if(input$education != "All") {
         education_used <- "EducationField"
       } else {
         education_used <- NULL
       }
       
+      # This code checks if a JobRole filter has been applied
       if(input$jobrole != "All") {
         jobrole_used <- "JobRole"
       } else {
         jobrole_used <- NULL
       }
       
+      # This code makes a vector of all used filters, in terms of the variable names in the dataset
       filters_used <- c(gender_used, department_used, education_used, jobrole_used)
       
-      # This if else chain takes the chosen outcome names and puts them in terms
-      # of the variable names in the dataset
+      # This if else chain takes the chosen outcome name and puts it in terms
+      # of the variable name in the dataset
       if (input$outcome == "Monthly Pay") {
         chosen_outcome <- "MonthlyIncome"
       } else if (input$outcome == "Turnover Status") {
@@ -131,6 +159,8 @@ server <- function(input, output) {
         chosen_outcome <- "JobSatisfaction"
       }
       
+      # This code makes the table, grouping the dataset by the filter variables used
+      # and getting a summary of means and standard deviations split by groups
       finalshinydata_import_tbl %>% 
         group_by(across(all_of(filters_used))) %>% 
         summarise("Mean" = mean(.data[[chosen_outcome]]), "Standard Deviation" = sd(.data[[chosen_outcome]]))
